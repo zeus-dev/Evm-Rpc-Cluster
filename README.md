@@ -151,14 +151,6 @@ Geth logs:kubectl logs -l app=geth -n default
 Look for Served engine_exchangeTransitionConfigurationV1 or block imports.
 Prysm logs:kubectl logs -l app=prysm -n default
 
-Look for Synced to slot X or Connected to execution client.
-
-
-
-
-
-📬 Contact
-For feedback or improvements, raise an issue or reach out to the maintainer.
 
 📄 License
 MIT © 2025```
