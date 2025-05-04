@@ -4,6 +4,8 @@ A production-ready Ethereum node cluster with **Geth** (Execution Layer) and **P
 
 ---
 
+
+
 ## 📁 Project Structure
 
 ethereum-node-cluster/├── docker/geth/                 # Dockerfile for hardened Geth image├── exporters/node-exporter/    # Prometheus Node Exporter Kubernetes manifests├── grafana-dashboards/         # Custom Grafana dashboards for Geth and Prysm├── k8s/                        # Kubernetes manifests organized by component│   ├── geth/                   # Geth StatefulSet, Service, PVC│   ├── prysm/                  # Prysm StatefulSet, Service│   ├── hpa/                    # Horizontal Pod Autoscaler for Geth│   ├── ingress/                # NGINX Ingress for Geth RPC│   ├── monitoring/             # Prometheus, Grafana, Loki, Alerts│   ├── redis/                  # Redis for caching│   └── sysctl/                 # System tuning DaemonSet├── terraform/                  # Terraform for provisioning AKS and infra├── README.md                   # 📘 You're here
@@ -150,6 +152,8 @@ Geth logs:kubectl logs -l app=geth -n default
 
 Look for Served engine_exchangeTransitionConfigurationV1 or block imports.
 Prysm logs:kubectl logs -l app=prysm -n default
+
+
 
 
 📄 License
