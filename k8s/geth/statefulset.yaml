@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: geth-node
+  namespace: default
+spec:
+  serviceName: geth
+  replicas: 2
+  selector:
+    matchLabels:
+      app: geth
+  template:
+    metadata:
+      labels:
+        app: geth
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: geth
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: geth
+        image: geth-custom:v1.0.0
+        ports:
+        - containerPort: 8545
+          name: http-rpc
+        - containerPort: 8546
+          name: ws-rpc
+        - containerPort: 30303
+          name: p2p-tcp
+          protocol: TCP
+        - containerPort: 30303
+          name: p2p-udp
+          protocol: UDP
+        - containerPort: 8551
+          name: engine-api
+        livenessProbe:
+          tcpSocket:
+            port: 8545
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          tcpSocket:
+            port: 8545
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: "1"
+            memory: "4Gi"
+          limits:
+            cpu: "2"
+            memory: "8Gi"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - name: geth-data
+          mountPath: /root/.ethereum
+        - name: jwt-secret
+          mountPath: /etc/geth
+          readOnly: true
+        args:
+        - "--http"
+        - "--http.addr=0.0.0.0"
+        - "--http.api=eth,net,web3"
+        - "--metrics"
+        - "--pprof"
+        - "--no-admin"
+        - "--syncmode=snap"
+        - "--cache=2048"
+        - "--txlookuplimit=0"
+        - "--authrpc.port=8551"
+        - "--authrpc.jwtsecret=/etc/geth/jwt.hex"
+        - "--authrpc.addr=0.0.0.0"
+      volumes:
+      - name: jwt-secret
+        secret:
+          secretName: jwt-secret
+  volumeClaimTemplates:
+  - metadata:
+      name: geth-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: azure-disk-premium
+      resources:
+        requests:
+          storage: 100Gi

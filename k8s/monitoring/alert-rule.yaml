@@ -1,0 +1,45 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: geth-alert-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: geth-rules
+    rules:
+    - alert: HighRPCLatency
+      expr: histogram_quantile(0.9, rate(rpc_request_duration_seconds_bucket[1m])) > 1
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High RPC latency detected"
+    - alert: RPC5xxErrors
+      expr: rate(http_requests_total{status=~"5.."}[1m]) > 5
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High rate of 5xx errors on RPC endpoint"
+    - alert: NodeSyncLag
+      expr: geth_block_height - geth_current_block > 50
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Node is lagging behind"
+    - alert: ForkDetected
+      expr: changes(geth_block_hash[5m]) > 1
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Possible chain fork detected"
+    - alert: UnauthorizedAccess
+      expr: rate(nginx_ingress_controller_requests{status="403"}[5m]) > 10
+      for: 2m
+      labels:
+        severity: high
+        type: security
+      annotations:
+        summary: "Repeated unauthorized access attempts detected"

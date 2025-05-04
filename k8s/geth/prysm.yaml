@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prysm-beacon
+  namespace: default
+spec:
+  replicas: 1
+  serviceName: prysm-beacon
+  selector:
+    matchLabels:
+      app: prysm-beacon
+  template:
+    metadata:
+      labels:
+        app: prysm-beacon
+    spec:
+      containers:
+      - name: beacon
+        image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
+        ports:
+        - containerPort: 4000 # REST API
+        - containerPort: 13000 # LibP2P
+        - containerPort: 12000 # UDP discovery
+        volumeMounts:
+        - name: beacon-data
+          mountPath: /data
+        - name: jwt-secret
+          mountPath: /jwt
+          readOnly: true
+        args:
+        - "--datadir=/data"
+        - "--accept-terms-of-use"
+        - "--execution-endpoint=http://geth:8551"
+        - "--jwt-secret=/jwt/jwt.hex"
+        - "--genesis-beacon-api-url=https://example.com"
+        - "--grpc-gateway-port=4000"
+        - "--p2p-host-ip=$(POD_IP)"
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+      volumes:
+      - name: jwt-secret
+        secret:
+          secretName: jwt-secret
+  volumeClaimTemplates:
+  - metadata:
+      name: beacon-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: azure-disk-premium
+      resources:
+        requests:
+          storage: 100Gi
