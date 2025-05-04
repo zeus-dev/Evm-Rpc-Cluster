@@ -14,4 +14,4 @@ ENTRYPOINT ["geth"]
 
 FROM alpine:3.19.1 as debug
 COPY --from=BUILDER /geth/build/bin/geth /usr/local/bin/
-ENTRYPOINT ["geth"]s
+ENTRYPOINT ["geth"]
