@@ -37,7 +37,6 @@ terraform apply
 This provisions:
 
 Azure Kubernetes Service (AKS)
-Azure Container Registry (ACR)
 Required RBAC and networking components
 
 
